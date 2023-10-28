@@ -1,8 +1,17 @@
-import './style.css'
+import "./style.css";
 
-const app = document.querySelector<HTMLDivElement>('#app')!
+const VALID_NUMBER_OF_DIGITS = 3;
+const BASE_DIGIT = 10;
 
-app.innerHTML = `
-  <h1>Hello Vite!</h1>
-  <a href="https://vitejs.dev/guide/features.html" target="_blank">Documentation</a>
-`
+// const resultEl = document.querySelector("#result") as HTMLElement; // 타입 강제
+const resultEl = <HTMLDivElement>document.querySelector("#result");
+
+if (resultEl) {
+  resultEl.innerText = String(9999);
+}
+
+resultEl.addEventListener("click", function ({ target }: MouseEvent) {
+  if (target) {
+    alert((target as HTMLDivElement).innerText);
+  }
+});
