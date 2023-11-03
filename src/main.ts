@@ -13,6 +13,7 @@ interface CalculatorInterface {
   calculate(operator: Operator | string): void;
   initEvent(): void;
 }
+//변경테스트
 
 const VALID_NUMBER_OF_DIGITS = 3;
 const INIT_VALUE = 0;
