@@ -1,17 +1,23 @@
 import "./style.css";
-type Operator = "+" | "-" | "x" | "÷" | "=";
+type Operator = "+" | "-" | "×" | "÷" | "=";
+
+type ComputedValue = {
+  [key in Exclude<Operator, "=">]: (num1: number, num2: number) => number;
+};
 
 interface CalculatorInterface {
   tempValue: string | number;
   tempOperator?: Operator | string;
   render(inputValue: string | number): void;
   reset(): void;
-  tempCalculate(operator: Operator | string): void;
+  calculate(operator: Operator | string): void;
   initEvent(): void;
 }
+//변경테스트
 
 const VALID_NUMBER_OF_DIGITS = 3;
 const INIT_VALUE = 0;
+const OPERATORS = ["+", "-", "×", "÷"];
 
 const validateNumberLength = (value: string | number) => {
   return String(value).length < VALID_NUMBER_OF_DIGITS;
@@ -19,20 +25,12 @@ const validateNumberLength = (value: string | number) => {
 
 const isZero = (value: string) => Number(value) === 0;
 
-const plus = (num1: number, num2: number) => num1 + num2;
-const minus = (num1: number, num2: number) => num1 - num2;
-const multiple = (num1: number, num2: number) => num1 * num2;
-const divide = (num1: number, num2: number) => num1 / num2;
-
-type ComputedValue = {
-  [key in Exclude<Operator, "=">]: (num1: number, num2: number) => number;
-};
 
 const getComputedValue: ComputedValue = {
-  "+": plus,
-  "-": minus,
-  "x": multiple,
-  "÷": divide,
+  "+": (num1: number, num2: number) => num1 + num2,
+  "-": (num1: number, num2: number) => num1 - num2,
+  "×": (num1: number, num2: number) => num1 * num2,
+  "÷": (num1: number, num2: number) => num1 / num2,
 };
 
 const Calculator: CalculatorInterface = {
@@ -51,21 +49,22 @@ const Calculator: CalculatorInterface = {
     }
   },
   reset() {
-    // this.targetValue = 0;
+    const resultEl = <HTMLDivElement>document.querySelector("#result");
+    resultEl.innerText = String(INIT_VALUE);
+    this.tempValue = INIT_VALUE;
+    this.tempOperator = undefined;
   },
-  tempCalculate(operator: Operator | string) {
-    const isReadyCalculate = operator === "=";
-    const isTempCalculate = ["+", "-", "x", "÷"].includes(operator);
-    if (isTempCalculate) {
+  calculate(operator: Operator | string) {
+    const isTempCalculated = OPERATORS.includes(operator);
+    const isReadyCalculated = operator === "=" && this.tempOperator && OPERATORS.includes(this.tempOperator);
+    if (isTempCalculated) {
       const resultEl = <HTMLDivElement>document.querySelector("#result");
-
       this.tempOperator = operator;
       this.tempValue = Number(resultEl.innerText);
-
       resultEl.innerText = String(0);
       return;
     }
-    if (this.tempOperator && ["+", "-", "x", "÷"].includes(this.tempOperator) && isReadyCalculate) {
+    if (this.tempOperator && OPERATORS.includes(this.tempOperator) && isReadyCalculated) {
       const resultEl = <HTMLDivElement>document.querySelector("#result");
 
       const resultValue = getComputedValue[this.tempOperator as Exclude<Operator, "=">](
@@ -83,14 +82,12 @@ const Calculator: CalculatorInterface = {
       const buttonText = (target as HTMLButtonElement).innerText;
       if (buttonText === "AC") {
         this.reset();
-      }
-
-      if (["+", "-", "x", "÷", "="].includes(buttonText)) {
-        this.tempCalculate(buttonText);
-
         return;
       }
-
+      if (OPERATORS.concat('=').includes(buttonText)) {
+        this.calculate(buttonText);
+        return;
+      }
       if (!Number.isNaN(buttonText)) {
         this.render(Number(buttonText));
       }
